@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadavre Exquis</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Cadavre Exquis</h1>
+    <canvas id="drawing" width="500" height="500" data-tool="pen"></canvas>
+    <h2>Drawing Canvas</h2>
+    <div class="toolbar">
+      <div class="tool">
+        <input id="pen" type="radio" name="tool" value="pen" checked />
+        <label for="pen">🖊️</label>
+      </div>
+      <div class="tool">
+        <input id="eraser" type="radio" name="tool" value="eraser" />
+        <label for="eraser">🧽</label>
+      </div>
+    </div>
+    <script src="game.js"></script>
+  </div>
+</body>
+</html>

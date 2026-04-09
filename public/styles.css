@@ -1,0 +1,70 @@
+h1 {
+  font-family: 'Arial', sans-serif;
+  font-size: 2rem;
+  margin-top: 2rem;
+}
+
+h2 {
+  font-family: 'Arial', sans-serif;
+  font-size: 1.5rem;
+  margin-top: 1rem;
+}
+
+.container {
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem;
+}
+
+.toolbar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tool input[type="radio"] {
+  display: none;
+}
+
+/* Make the label look like a button */
+.tool label {
+  display: block;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Hover state for better UX */
+.tool label:hover {
+  background-color: #e0e0e0;
+}
+
+/* The "Active" state when the radio is checked */
+.tool input[type="radio"]:checked + label {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+
+#drawing {
+  border: 1px solid black;
+  background-color: #F0F8FF;
+}
+
+#drawing[data-tool="pen"] {
+  cursor: url('./images/pen-cursor.png') 5 5, auto;
+}
+
+#drawing[data-tool="eraser"] {
+  cursor: url('./images/eraser-cursor.png') 0 0, auto;
+}

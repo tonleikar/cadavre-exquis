@@ -2,6 +2,7 @@
   "name": "cadavre-exquis",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "devStart": "nodemon server.js"
   },
@@ -11,7 +12,7 @@
   "description": "",
   "dependencies": {
     "ejs": "^5.0.1",
-    "express": "^5.2.1"
+    "express": "^4.22.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
