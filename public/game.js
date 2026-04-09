@@ -5,6 +5,7 @@ const colorBackground = "#F0F8FF";
 const colorLine = "#9ACD32";
 const penTool = {color: colorLine, width: 5};
 const eraserTool = {color: colorBackground, width: 20};
+const doneButton = document.getElementById("done-button");
 
 
 let pressedMouse = false;
@@ -14,6 +15,11 @@ let currentTool = penTool;
 
 
 console.log("game.js is loaded");
+
+const prepareCanvas = () => {
+  paper.fillStyle = colorBackground;
+  paper.fillRect(0, 0, canvas.width, canvas.height);
+}
 
 const drawingLine = (tool, xStart, yStart, xEnd, yEnd, board) => {
 	board.beginPath();
@@ -61,6 +67,16 @@ const clearCanvas = ({ code }) => {
 	}
 };
 
+const saveCanvas = () => {
+  const dataURL = canvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = dataURL;
+  link.download = "drawing.png";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 tools.forEach(tool => {
   tool.addEventListener("change", () => {
     if (tool.value === 'eraser') {
@@ -73,7 +89,10 @@ tools.forEach(tool => {
   });
 });
 
+prepareCanvas();
+
 canvas.addEventListener("mousedown", startDrawing);
 canvas.addEventListener("mousemove", drawLine);
 window.addEventListener("mouseup", stopDrawing);
 document.addEventListener("keydown", clearCanvas);
+doneButton.addEventListener("click", saveCanvas);
