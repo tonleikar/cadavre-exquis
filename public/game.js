@@ -5,7 +5,7 @@ const clearButton = document.getElementById("clear-button");
 const colorBackground = "#F0F8FF";
 const colorLine = "#222222";
 const penTool = {color: colorLine, width: 1};
-const eraserTool = {color: colorBackground, width: 10};
+const eraserTool = {color: colorBackground, width: 5};
 const doneButton = document.getElementById("done-button");
 
 
