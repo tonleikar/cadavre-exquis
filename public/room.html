@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadavre Exquis</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>CADAVRE EXQUIS</h1>
+    <canvas id="drawing" width="100" height="100" data-tool="pen"></canvas>
+    <div class="toolbar">
+      <div class="tool">
+        <input id="pen" type="radio" name="tool" value="pen" checked />
+        <label for="pen"><img src="images/pen-icon.png" alt="Pen tool"></label>
+      </div>
+      <div class="tool">
+        <input id="eraser" type="radio" name="tool" value="eraser" />
+        <label for="eraser"><img src="images/eraser-icon.png" alt="Eraser tool"></label>
+      </div>
+      <div class="tool">
+        <input id="clear-button" type="button" name="clear" value="clear" />
+        <label for="clear-button"><img src="images/clear-icon.png" alt="Clear tool"></label>
+      </div>
+    </div>
+    <button id="done-button">DONE</button>
+    <script src="game.js"></script>
+  </div>
+</body>
+</html>

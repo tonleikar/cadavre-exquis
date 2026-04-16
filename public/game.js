@@ -7,6 +7,7 @@ const colorLine = "#222222";
 const penTool = {color: colorLine, width: 1};
 const eraserTool = {color: colorBackground, width: 5};
 const doneButton = document.getElementById("done-button");
+const roomMeta = document.getElementById("room-meta");
 
 
 let pressedMouse = false;
@@ -16,6 +17,15 @@ let currentTool = penTool;
 
 
 console.log("game.js is loaded");
+
+const hydrateRoomMeta = () => {
+	if (!roomMeta) return;
+
+	const params = new URLSearchParams(window.location.search);
+	const playerName = params.get("name") || "Anonymous";
+	const roomCode = params.get("room") || "Unknown";
+	roomMeta.textContent = `Player: ${playerName} | Room: ${roomCode}`;
+};
 
 const prepareCanvas = () => {
   paper.imageSmoothingEnabled = false;
@@ -114,6 +124,7 @@ tools.forEach(tool => {
 });
 
 prepareCanvas();
+hydrateRoomMeta();
 
 
 canvas.addEventListener("mousedown", startDrawing);

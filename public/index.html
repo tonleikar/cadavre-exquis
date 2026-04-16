@@ -7,25 +7,29 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>CADAVRE EXQUIS</h1>
-    <canvas id="drawing" width="100" height="100" data-tool="pen"></canvas>
-    <div class="toolbar">
-      <div class="tool">
-        <input id="pen" type="radio" name="tool" value="pen" checked />
-        <label for="pen"><img src="images/pen-icon.png" alt="Pen tool"></label>
+      <div class="container">
+        <div class="white-box-border">
+          <h1 id="game-title">CADAVRE EXQUIS</h1>
+          <p class="lobby-subtitle">The exquisite corpse shall drink the new wine</p>
+        </div>
+        <div class="white-box-border">
+          <form id="lobby-form" class="lobby-form" novalidate>
+            <div class="lobby-input">
+              <label for="player-name">Name:</label>
+              <input id="player-name" name="playerName" type="text" maxlength="24" autocomplete="nickname" placeholder="Enter name" required>
+            </div>
+            <div class="lobby-input">
+              <label for="room-code">Room:</label>
+              <input id="room-code" name="roomCode" type="text" maxlength="4" placeholder="Enter four digit code">
+            </div>
+            <div class="lobby-actions">
+              <button id="join-room-button" type="button" class="lobby-button">Join Room</button>
+              <button id="create-room-button" type="button" class="lobby-button">Create Room</button>
+            </div>
+            <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </div>
       </div>
-      <div class="tool">
-        <input id="eraser" type="radio" name="tool" value="eraser" />
-        <label for="eraser"><img src="images/eraser-icon.png" alt="Eraser tool"></label>
-      </div>
-      <div class="tool">
-        <input id="clear-button" type="button" name="clear" value="clear" />
-        <label for="clear-button"><img src="images/clear-icon.png" alt="Clear tool"></label>
-      </div>
-    </div>
-    <button id="done-button">DONE</button>
-    <script src="game.js"></script>
-  </div>
+  <script src="lobby.js"></script>
 </body>
 </html>
