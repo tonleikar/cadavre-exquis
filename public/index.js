@@ -54,7 +54,7 @@ const joinRoom = async () => {
     }
 
     const queryParams = new URLSearchParams({ roomNumber: room }).toString();
-    window.location.href = `room.html?${queryParams}`;
+    window.location.href = `lobby.html?${queryParams}`;
   } catch (error) {
     console.error('Error joining room:', error);
     formMessage.textContent = "Error joining room. Please try again.";

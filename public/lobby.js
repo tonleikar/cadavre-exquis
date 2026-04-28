@@ -2,6 +2,7 @@ console.log("lobby.js is loaded");
 
 const roomNumberSpan = document.getElementById("room-number");
 const readyButton = document.getElementById("join-room-button");
+const startGameButton = document.getElementById("start-game-button");
 const participantsList = document.getElementById("participants-list");
 
 const params = new URLSearchParams(window.location.search);
@@ -17,7 +18,6 @@ const connectWebSocket = () => {
 
   ws.addEventListener('open', () => {
     console.log('WebSocket connected');
-    // Join the room via WebSocket
     ws.send(JSON.stringify({
       type: 'join-room',
       roomNumber,
@@ -32,7 +32,6 @@ const connectWebSocket = () => {
       participants = message.participants;
       updateParticipantsList();
     } else if (message.type === 'player-joined') {
-      // Check if participant already exists
       if (!participants.find(p => p.userId === message.userId)) {
         participants.push({ userId: message.userId, username: message.username });
         updateParticipantsList();
@@ -61,16 +60,34 @@ const updateParticipantsList = () => {
   }
 };
 
+const startGame = () => {
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({
+      type: 'start-game',
+      roomNumber
+    }));
+    // Redirect to game room
+    const queryParams = new URLSearchParams({ roomNumber }).toString();
+    window.location.href = `room.html?${queryParams}`;
+  }
+};
+
 if (roomNumber) {
   roomNumberSpan.textContent = roomNumber;
   connectWebSocket();
 }
 
-readyButton.addEventListener("click", () => {
-  if (ws) {
-    ws.close();
-  }
-  const room = roomNumberSpan.textContent.trim();
-  const queryParams = new URLSearchParams({ roomNumber: room }).toString();
-  window.location.href = `room.html?${queryParams}`;
-});
+if (readyButton) {
+  readyButton.addEventListener("click", () => {
+    if (ws) {
+      ws.close();
+    }
+    const room = roomNumberSpan.textContent.trim();
+    const queryParams = new URLSearchParams({ roomNumber: room }).toString();
+    window.location.href = `room.html?${queryParams}`;
+  });
+}
+
+if (startGameButton) {
+  startGameButton.addEventListener("click", startGame);
+}

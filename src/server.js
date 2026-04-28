@@ -15,6 +15,7 @@ const wss = new WebSocketServer({ server });
 const users = [];
 const rooms = [];
 const roomConnections = new Map(); // Map of roomNumber -> Set of WebSocket connections
+const gameState = new Map(); // Map of roomNumber -> { currentDrawerIndex, drawingHistory, isStarted }
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -41,7 +42,7 @@ app.post('/api/users', (req, res) => {
   res.json({ userId, username: user.username });
 });
 
-// Create a new room
+
 app.post('/api/rooms', (req, res) => {
   const { userId } = req.body;
 
@@ -61,7 +62,7 @@ app.post('/api/rooms', (req, res) => {
   res.json({ roomNumber });
 });
 
-// Join a room
+
 app.post('/api/rooms/:roomNumber/join', (req, res) => {
   const { userId } = req.body;
   const { roomNumber } = req.params;
@@ -87,7 +88,7 @@ app.post('/api/rooms/:roomNumber/join', (req, res) => {
   res.json({ roomNumber, participants: room.participants });
 });
 
-// WebSocket handling for real-time room updates
+
 wss.on('connection', (ws) => {
   let currentRoom = null;
   let currentUserId = null;
@@ -128,6 +129,58 @@ wss.on('connection', (ws) => {
                 type: 'player-joined',
                 userId: userId,
                 username: user.username
+              }));
+            }
+          });
+        }
+      } else if (message.type === 'start-game') {
+        const { roomNumber } = message;
+        const room = rooms.find(r => r.roomNumber === roomNumber);
+
+        if (room) {
+          gameState.set(roomNumber, {
+            currentDrawerIndex: 0,
+            drawingHistory: [],
+            isStarted: true
+          });
+
+          const currentDrawerId = room.participants[0];
+          const currentDrawer = users.find(u => u.userId === currentDrawerId);
+
+          const roomClients = roomConnections.get(roomNumber);
+          roomClients.forEach(client => {
+            if (client.readyState === 1) {
+              client.send(JSON.stringify({
+                type: 'game-started',
+                currentDrawerId,
+                currentDrawerUsername: currentDrawer.username,
+                previousDrawing: null
+              }));
+            }
+          });
+        }
+      } else if (message.type === 'submit-drawing') {
+        const { roomNumber, userId, imageData } = message;
+        const room = rooms.find(r => r.roomNumber === roomNumber);
+        const state = gameState.get(roomNumber);
+
+        if (room && state) {
+          // Store drawing
+          state.drawingHistory.push({ userId, imageData, roomNumber });
+
+          // Move to next drawer
+          state.currentDrawerIndex = (state.currentDrawerIndex + 1) % room.participants.length;
+          const nextDrawerId = room.participants[state.currentDrawerIndex];
+          const nextDrawer = users.find(u => u.userId === nextDrawerId);
+
+          const roomClients = roomConnections.get(roomNumber);
+          roomClients.forEach(client => {
+            if (client.readyState === 1) {
+              client.send(JSON.stringify({
+                type: 'turn-update',
+                currentDrawerId: nextDrawerId,
+                currentDrawerUsername: nextDrawer.username,
+                previousDrawing: imageData
               }));
             }
           });
