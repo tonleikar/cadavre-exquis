@@ -172,3 +172,45 @@ body {
 #done-button:active {
   background-color: #d0d0d0;
 }
+
+.grid-progress-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 500px;
+}
+
+.grid-square {
+  width: 30px;
+  height: 30px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #f0f0f0;
+}
+
+.grid-square.filled {
+  background-color: #7e7e7e;
+  color: white;
+}
+
+#play-again-button {
+  font-family: 'Pixelify Sans', monospace;
+  font-size: 1.5rem;
+  border: 4px solid black;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+#play-again-button:hover {
+  background-color: #e0e0e0;
+}
+
+#play-again-button:active {
+  background-color: #d0d0d0;
+}

@@ -25,6 +25,8 @@ let ws = null;
 let isMyTurn = false;
 let gridSize = 2;
 let turnIndex = 0;
+let totalTurns = 0;
+let gameComplete = false;
 
 console.log("game.js is loaded");
 
@@ -83,27 +85,37 @@ const connectWebSocket = () => {
     const message = JSON.parse(event.data);
 
     if (message.type === 'game-started') {
+      gameComplete = false;
       currentDrawerId = message.currentDrawerId;
       isMyTurn = userId === currentDrawerId;
       gridSize = message.gridSize || 2;
       turnIndex = 0;
+      totalTurns = gridSize * gridSize;
+      document.getElementById('play-again-button').style.display = 'none';
       updateGameStatus(message.currentDrawerUsername, message.previousDrawing);
+      updateGridProgress();
     } else if (message.type === 'turn-update') {
       currentDrawerId = message.currentDrawerId;
       isMyTurn = userId === currentDrawerId;
       gridSize = message.gridSize || 2;
       turnIndex = message.turnIndex || 0;
       updateGameStatus(message.currentDrawerUsername, message.previousDrawing);
+      updateGridProgress();
       if (isMyTurn) {
         clearCanvas();
         displayPreviousDrawing(message.previousDrawing);
       }
     } else if (message.type === 'game-complete') {
-      // Store all drawings and redirect to gallery
+      gameComplete = true;
+      updateGridProgress();
+      // Show play again button instead of redirecting immediately
+      document.getElementById('play-again-button').style.display = 'block';
+      canvas.style.opacity = "0.5";
+      canvas.style.pointerEvents = "none";
+      doneButton.disabled = true;
+      // Store all drawings
       localStorage.setItem('drawings', JSON.stringify(message.drawings));
       localStorage.setItem('gridSize', message.gridSize || gridSize);
-      const queryParams = new URLSearchParams({ roomNumber }).toString();
-      window.location.href = `gallery.html?${queryParams}`;
     }
   });
 
@@ -117,6 +129,10 @@ const connectWebSocket = () => {
 };
 
 const updateGameStatus = (drawerUsername, previousDrawing) => {
+  if (gameComplete) {
+    statusMessage.textContent = `Game Complete!`;
+    return;
+  }
   if (isMyTurn) {
     statusMessage.textContent = `Your turn to draw!`;
     canvas.style.opacity = "1";
@@ -129,6 +145,30 @@ const updateGameStatus = (drawerUsername, previousDrawing) => {
     doneButton.disabled = true;
   }
   currentDrawerEl.textContent = `${drawerUsername} is drawing`;
+};
+
+const updateGridProgress = () => {
+  const progressContainer = document.getElementById('grid-progress');
+  progressContainer.innerHTML = '';
+
+  if (totalTurns === 0) return;
+
+  const gridDiv = document.createElement('div');
+  gridDiv.className = 'grid-progress-container';
+
+  for (let i = 0; i < totalTurns; i++) {
+    const square = document.createElement('div');
+    square.className = 'grid-square';
+    if (i < turnIndex) {
+      square.classList.add('filled');
+      square.textContent = '✓';
+    } else {
+      square.textContent = '';
+    }
+    gridDiv.appendChild(square);
+  }
+
+  progressContainer.appendChild(gridDiv);
 };
 
 const displayPreviousDrawing = (imageDataUrl) => {
@@ -279,3 +319,8 @@ canvas.addEventListener("mousemove", drawLine);
 window.addEventListener("mouseup", stopDrawing);
 doneButton.addEventListener("click", submitDrawing);
 clearButton.addEventListener("click", clearCanvas);
+
+document.getElementById('play-again-button').addEventListener("click", () => {
+  const queryParams = new URLSearchParams({ roomNumber }).toString();
+  window.location.href = `gallery.html?${queryParams}`;
+});

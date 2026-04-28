@@ -193,8 +193,12 @@ wss.on('connection', (ws) => {
           // Store drawing
           state.drawingHistory.push({ userId, imageData, roomNumber });
 
-          // Check if all participants have drawn
-          const isGameComplete = state.drawingHistory.length === room.participants.length;
+          // Calculate total turns needed to fill grid
+          const totalGridCells = state.gridSize * state.gridSize;
+          const totalTurnsNeeded = totalGridCells;
+
+          // Check if all grid cells have been filled
+          const isGameComplete = state.drawingHistory.length === totalTurnsNeeded;
 
           if (isGameComplete) {
             // Game complete - send all drawings for stitching
@@ -209,7 +213,7 @@ wss.on('connection', (ws) => {
               }
             });
           } else {
-            // Move to next drawer
+            // Move to next drawer in cyclic order
             state.currentDrawerIndex = (state.currentDrawerIndex + 1) % room.participants.length;
             const nextDrawerId = room.participants[state.currentDrawerIndex];
             const nextDrawer = users.find(u => u.userId === nextDrawerId);
