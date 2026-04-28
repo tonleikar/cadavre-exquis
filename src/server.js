@@ -138,7 +138,9 @@ wss.on('connection', (ws) => {
               type: 'turn-update',
               currentDrawerId,
               currentDrawerUsername: currentDrawer.username,
-              previousDrawing
+              previousDrawing,
+              gridSize: state.gridSize,
+              turnIndex: state.drawingHistory.length
             }));
           }
 
@@ -155,14 +157,15 @@ wss.on('connection', (ws) => {
           });
         }
       } else if (message.type === 'start-game') {
-        const { roomNumber } = message;
+        const { roomNumber, gridSize } = message;
         const room = rooms.find(r => r.roomNumber === roomNumber);
 
         if (room) {
           gameState.set(roomNumber, {
             currentDrawerIndex: 0,
             drawingHistory: [],
-            isStarted: true
+            isStarted: true,
+            gridSize: gridSize || 2
           });
 
           const currentDrawerId = room.participants[0];
@@ -175,7 +178,8 @@ wss.on('connection', (ws) => {
                 type: 'game-started',
                 currentDrawerId,
                 currentDrawerUsername: currentDrawer.username,
-                previousDrawing: null
+                previousDrawing: null,
+                gridSize: gridSize || 2
               }));
             }
           });
@@ -199,7 +203,8 @@ wss.on('connection', (ws) => {
               if (client.readyState === 1) {
                 client.send(JSON.stringify({
                   type: 'game-complete',
-                  drawings: state.drawingHistory.map(d => d.imageData)
+                  drawings: state.drawingHistory.map(d => d.imageData),
+                  gridSize: state.gridSize
                 }));
               }
             });
@@ -216,7 +221,9 @@ wss.on('connection', (ws) => {
                   type: 'turn-update',
                   currentDrawerId: nextDrawerId,
                   currentDrawerUsername: nextDrawer.username,
-                  previousDrawing: imageData
+                  previousDrawing: imageData,
+                  gridSize: state.gridSize,
+                  turnIndex: state.drawingHistory.length
                 }));
               }
             });

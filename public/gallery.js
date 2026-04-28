@@ -7,6 +7,8 @@ const downloadButton = document.getElementById("download-button");
 const params = new URLSearchParams(window.location.search);
 const roomNumber = params.get("roomNumber");
 const drawingsJson = localStorage.getItem("drawings");
+const gridSizeStr = localStorage.getItem("gridSize");
+const gridSize = gridSizeStr ? parseInt(gridSizeStr, 10) : 2;
 
 if (roomNumber) {
   roomNumberSpan.textContent = roomNumber;
@@ -35,9 +37,11 @@ if (drawingsJson) {
   const stitchImages = (images) => {
     if (images.length === 0) return;
 
-    // Assume all images have the same width, and calculate total height
-    const width = images[0].width;
-    const height = images[0].height * images.length;
+    // Calculate canvas dimensions based on grid size
+    const cellWidth = images[0].width;
+    const cellHeight = images[0].height;
+    const width = cellWidth * gridSize;
+    const height = cellHeight * gridSize;
 
     finalImageCanvas.width = width;
     finalImageCanvas.height = height;
@@ -46,11 +50,13 @@ if (drawingsJson) {
     ctx.fillStyle = "#F0F8FF";
     ctx.fillRect(0, 0, width, height);
 
-    // Draw each image vertically
-    let currentY = 0;
-    images.forEach(img => {
-      ctx.drawImage(img, 0, currentY);
-      currentY += img.height;
+    // Draw each image in grid position
+    images.forEach((img, index) => {
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+      const x = col * cellWidth;
+      const y = row * cellHeight;
+      ctx.drawImage(img, x, y);
     });
   };
 }

@@ -23,12 +23,48 @@ let userId = null;
 let roomNumber = null;
 let ws = null;
 let isMyTurn = false;
+let gridSize = 2;
+let turnIndex = 0;
 
 console.log("game.js is loaded");
 
 const params = new URLSearchParams(window.location.search);
 roomNumber = params.get("roomNumber");
+gridSize = parseInt(params.get("gridSize") || "2", 10);
 userId = localStorage.getItem("userId");
+
+// Helper function to calculate grid position (row, col) from turn index
+const getGridPosition = (index, size) => {
+  return {
+    row: Math.floor(index / size),
+    col: index % size
+  };
+};
+
+// Helper function to extract the correct image slice based on grid position
+const extractImageSlice = (imageDataUrl, gridSize, turnIndex) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const { row, col } = getGridPosition(turnIndex, gridSize);
+      const sliceWidth = img.width / gridSize;
+      const sliceHeight = img.height / gridSize;
+      const sourceX = col * sliceWidth;
+      const sourceY = row * sliceHeight;
+
+      // Create a canvas to draw the slice
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = sliceWidth;
+      sliceCanvas.height = sliceHeight;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, sourceX, sourceY, sliceWidth, sliceHeight, 0, 0, sliceWidth, sliceHeight);
+
+      resolve(sliceCanvas.toDataURL('image/png'));
+    };
+    img.src = imageDataUrl;
+  });
+};
 
 const connectWebSocket = () => {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -49,10 +85,14 @@ const connectWebSocket = () => {
     if (message.type === 'game-started') {
       currentDrawerId = message.currentDrawerId;
       isMyTurn = userId === currentDrawerId;
+      gridSize = message.gridSize || 2;
+      turnIndex = 0;
       updateGameStatus(message.currentDrawerUsername, message.previousDrawing);
     } else if (message.type === 'turn-update') {
       currentDrawerId = message.currentDrawerId;
       isMyTurn = userId === currentDrawerId;
+      gridSize = message.gridSize || 2;
+      turnIndex = message.turnIndex || 0;
       updateGameStatus(message.currentDrawerUsername, message.previousDrawing);
       if (isMyTurn) {
         clearCanvas();
@@ -61,6 +101,7 @@ const connectWebSocket = () => {
     } else if (message.type === 'game-complete') {
       // Store all drawings and redirect to gallery
       localStorage.setItem('drawings', JSON.stringify(message.drawings));
+      localStorage.setItem('gridSize', message.gridSize || gridSize);
       const queryParams = new URLSearchParams({ roomNumber }).toString();
       window.location.href = `gallery.html?${queryParams}`;
     }
@@ -92,17 +133,41 @@ const updateGameStatus = (drawerUsername, previousDrawing) => {
 
 const displayPreviousDrawing = (imageDataUrl) => {
   if (!imageDataUrl) {
-    previewContainer.style.display = "none";
     return;
   }
 
-  previewContainer.style.display = "block";
   const img = new Image();
   img.onload = () => {
-    previewPaper.imageSmoothingEnabled = false;
-    previewPaper.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-    // drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight)
-    previewPaper.drawImage(img, 0, img.height - 10, img.width, 10, 0, 0, img.width, 10);
+    paper.imageSmoothingEnabled = false;
+
+    // Get current grid position
+    const { row: currRow, col: currCol } = getGridPosition(turnIndex, gridSize);
+
+    // Draw left edge if not in first column
+    if (currCol > 0) {
+      const sourceX = img.width - 10;
+      const sourceY = 0;
+      const sourceW = 10;
+      const sourceH = img.height;
+
+      // Draw on left side of canvas with reduced opacity
+      paper.globalAlpha = 0.3;
+      paper.drawImage(img, sourceX, sourceY, sourceW, sourceH, 0, 0, 10, canvas.height);
+      paper.globalAlpha = 1;
+    }
+
+    // Draw top edge if not in first row
+    if (currRow > 0) {
+      const sourceX = 0;
+      const sourceY = img.height - 10;
+      const sourceW = img.width;
+      const sourceH = 10;
+
+      // Draw on top side of canvas with reduced opacity
+      paper.globalAlpha = 0.3;
+      paper.drawImage(img, sourceX, sourceY, sourceW, sourceH, 0, 0, canvas.width, 10);
+      paper.globalAlpha = 1;
+    }
   };
   img.src = imageDataUrl;
 };

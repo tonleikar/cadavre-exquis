@@ -4,6 +4,7 @@ const roomNumberSpan = document.getElementById("room-number");
 const readyButton = document.getElementById("join-room-button");
 const startGameButton = document.getElementById("start-game-button");
 const participantsList = document.getElementById("participants-list");
+const gridSizeSelect = document.getElementById("grid-size");
 
 const params = new URLSearchParams(window.location.search);
 const roomNumber = params.get("roomNumber");
@@ -62,12 +63,14 @@ const updateParticipantsList = () => {
 
 const startGame = () => {
   if (ws && ws.readyState === 1) {
+    const gridSize = parseInt(gridSizeSelect.value, 10);
     ws.send(JSON.stringify({
       type: 'start-game',
-      roomNumber
+      roomNumber,
+      gridSize
     }));
     // Redirect to game room
-    const queryParams = new URLSearchParams({ roomNumber }).toString();
+    const queryParams = new URLSearchParams({ roomNumber, gridSize }).toString();
     window.location.href = `room.html?${queryParams}`;
   }
 };
