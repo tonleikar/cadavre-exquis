@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadavre Exquis</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="white-box-border">
+      <h1 id="game-title">CADAVRE EXQUIS</h1>
+      <p class="lobby-subtitle">The exquisite corpse shall drink the new wine</p>
+    </div>
+    <div class="white-box-border">
+      <h1>Room Number: <span id="room-number"></span></h1>
+      <div id="gallery-container" style="text-align: center; margin: 20px 0;">
+        <p>Final Drawing:</p>
+        <canvas id="final-image"></canvas>
+      </div>
+      <div class="lobby-actions">
+        <button id="download-button" type="button" class="lobby-button">Download</button>
+      </div>
+    </div>
+  </div>
+  <script src="gallery.js"></script>
+</body>
+</html>

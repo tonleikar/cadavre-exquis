@@ -58,6 +58,11 @@ const connectWebSocket = () => {
         clearCanvas();
         displayPreviousDrawing(message.previousDrawing);
       }
+    } else if (message.type === 'game-complete') {
+      // Store all drawings and redirect to gallery
+      localStorage.setItem('drawings', JSON.stringify(message.drawings));
+      const queryParams = new URLSearchParams({ roomNumber }).toString();
+      window.location.href = `gallery.html?${queryParams}`;
     }
   });
 
@@ -94,9 +99,10 @@ const displayPreviousDrawing = (imageDataUrl) => {
   previewContainer.style.display = "block";
   const img = new Image();
   img.onload = () => {
+    previewPaper.imageSmoothingEnabled = false;
     previewPaper.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-    // Draw only the top 10 pixels
-    previewPaper.drawImage(img, 0, 0, img.width, 10, 0, 0, previewCanvas.width, previewCanvas.height);
+    // drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight)
+    previewPaper.drawImage(img, 0, img.height - 10, img.width, 10, 0, 0, img.width, 10);
   };
   img.src = imageDataUrl;
 };

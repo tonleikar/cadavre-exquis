@@ -28,6 +28,10 @@ app.get('/room', (req, res) => {
   res.sendFile(path.join(publicDir, 'room.html'));
 });
 
+app.get('/gallery', (req, res) => {
+  res.sendFile(path.join(publicDir, 'gallery.html'));
+});
+
 app.post('/api/users', (req, res) => {
   const { username } = req.body;
 
@@ -121,6 +125,23 @@ wss.on('connection', (ws) => {
             })
           }));
 
+          // If game has started, send current game state
+          const state = gameState.get(roomNumber);
+          if (state && state.isStarted) {
+            const currentDrawerId = room.participants[state.currentDrawerIndex];
+            const currentDrawer = users.find(u => u.userId === currentDrawerId);
+            const previousDrawing = state.drawingHistory.length > 0
+              ? state.drawingHistory[state.drawingHistory.length - 1].imageData
+              : null;
+
+            ws.send(JSON.stringify({
+              type: 'turn-update',
+              currentDrawerId,
+              currentDrawerUsername: currentDrawer.username,
+              previousDrawing
+            }));
+          }
+
           // Broadcast player joined to all in room
           const roomClients = roomConnections.get(roomNumber);
           roomClients.forEach(client => {
@@ -168,22 +189,38 @@ wss.on('connection', (ws) => {
           // Store drawing
           state.drawingHistory.push({ userId, imageData, roomNumber });
 
-          // Move to next drawer
-          state.currentDrawerIndex = (state.currentDrawerIndex + 1) % room.participants.length;
-          const nextDrawerId = room.participants[state.currentDrawerIndex];
-          const nextDrawer = users.find(u => u.userId === nextDrawerId);
+          // Check if all participants have drawn
+          const isGameComplete = state.drawingHistory.length === room.participants.length;
 
-          const roomClients = roomConnections.get(roomNumber);
-          roomClients.forEach(client => {
-            if (client.readyState === 1) {
-              client.send(JSON.stringify({
-                type: 'turn-update',
-                currentDrawerId: nextDrawerId,
-                currentDrawerUsername: nextDrawer.username,
-                previousDrawing: imageData
-              }));
-            }
-          });
+          if (isGameComplete) {
+            // Game complete - send all drawings for stitching
+            const roomClients = roomConnections.get(roomNumber);
+            roomClients.forEach(client => {
+              if (client.readyState === 1) {
+                client.send(JSON.stringify({
+                  type: 'game-complete',
+                  drawings: state.drawingHistory.map(d => d.imageData)
+                }));
+              }
+            });
+          } else {
+            // Move to next drawer
+            state.currentDrawerIndex = (state.currentDrawerIndex + 1) % room.participants.length;
+            const nextDrawerId = room.participants[state.currentDrawerIndex];
+            const nextDrawer = users.find(u => u.userId === nextDrawerId);
+
+            const roomClients = roomConnections.get(roomNumber);
+            roomClients.forEach(client => {
+              if (client.readyState === 1) {
+                client.send(JSON.stringify({
+                  type: 'turn-update',
+                  currentDrawerId: nextDrawerId,
+                  currentDrawerUsername: nextDrawer.username,
+                  previousDrawing: imageData
+                }));
+              }
+            });
+          }
         }
       }
     } catch (error) {
